@@ -24,11 +24,12 @@ MyApp::MyApp(QWidget* parent) :
 }
 
 MyApp::~MyApp() {
- delete m_runButton; 
+ //delete m_runButton; if added to layout, layout owns it and will delete, so not needed here
+ // and don't need to delete layout since it's managed?
  delete m_imagemap;
  delete m_image;
  delete m_graphicsScene;
- delete m_graphicsView;
+ //delete m_graphicsView;
  //delete m_imageLabel;
 }
 
@@ -36,6 +37,7 @@ void MyApp::onButtonClicked() {
   printf("hahahahahaha\n"); 
   m_imagemap->convertFromImage(*m_image);
   m_pixmapgraphicsitem->setPixmap(*m_imagemap);
+  m_graphicsView->fitInView(m_graphicsScene->sceneRect());
   //m_imageLabel->setPixmap(*m_imagemap);
 
 }

@@ -1,4 +1,5 @@
 #ifndef MYAPP_H
+#define MYAPP_H
 
 #include <QWidget>
 
@@ -22,8 +23,8 @@ private:
   QGraphicsScene* m_graphicsScene;
   QGraphicsView* m_graphicsView;
   QImage* m_image;
-  QPixmap* m_imagemap;
-  //QGraphicsPixmapItem* m_pixmapgraphicsitem;
+  //QPixmap* m_imagemap;
+  QGraphicsPixmapItem* m_pixmapgraphicsitem;
 
 private slots:
   void onButtonClicked();

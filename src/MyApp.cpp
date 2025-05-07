@@ -1,5 +1,6 @@
 #include "MyApp.hpp"
 #include <QtWidgets>
+#include "mylib.hpp"
 
 // TODO note actually ok to translate QImage > QPixmap
 // imagine: everything is in QImage. Only translate to display
@@ -41,6 +42,8 @@ void MyApp::onButtonClicked() {
   printf("hahahahahaha\n"); 
   //m_imagemap->convertFromImage(*m_image);
   //m_pixmapgraphicsitem->setPixmap(*m_imagemap);
+  unsigned char* im_data = m_image->bits();
+  MyLib::dofunc(im_data);
   m_graphicsScene->addPixmap(QPixmap::fromImage(*m_image));
   m_graphicsView->fitInView(m_graphicsScene->sceneRect(), Qt::KeepAspectRatio);
   //m_imageLabel->setPixmap(*m_imagemap);

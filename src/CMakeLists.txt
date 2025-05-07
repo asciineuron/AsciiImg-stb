@@ -4,7 +4,9 @@ qt_add_executable(asciimg
   stb_image_write.h 
   stb_truetype.h
   MyApp.cpp
-  MyApp.hpp)
+  MyApp.hpp
+  mylib.hpp
+  mylib.cpp)
 
 target_link_libraries(asciimg PRIVATE Qt6::Core Qt6::Gui Qt6::Widgets)
 

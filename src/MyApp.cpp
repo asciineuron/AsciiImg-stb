@@ -37,7 +37,7 @@ void MyApp::onButtonClicked() {
   printf("hahahahahaha\n"); 
   m_imagemap->convertFromImage(*m_image);
   m_pixmapgraphicsitem->setPixmap(*m_imagemap);
-  m_graphicsView->fitInView(m_graphicsScene->sceneRect());
+  m_graphicsView->fitInView(m_graphicsScene->sceneRect(), Qt::KeepAspectRatio);
   //m_imageLabel->setPixmap(*m_imagemap);
 
 }

@@ -23,7 +23,7 @@ private:
   QGraphicsView* m_graphicsView;
   QImage* m_image;
   QPixmap* m_imagemap;
-  QGraphicsPixmapItem* m_pixmapgraphicsitem;
+  //QGraphicsPixmapItem* m_pixmapgraphicsitem;
 
 private slots:
   void onButtonClicked();

@@ -1,15 +1,19 @@
 #include "MyApp.hpp"
 #include <QtWidgets>
 
+// TODO note actually ok to translate QImage > QPixmap
+// imagine: everything is in QImage. Only translate to display
+// once per click cycle, but never read qimage from that pixmap
+
 MyApp::MyApp(QWidget* parent) :
   QWidget(parent) {
   m_runButton = new QPushButton(tr("run"));
   m_image = new QImage("/Volumes/Ext/Code/AsciiImg-stb/scuba.jpg");
-  m_imagemap = new QPixmap;
+  //m_imagemap = new QPixmap;
   //m_imageLabel = new QLabel(tr("hi"));
   //m_imageLabel->setPixmap(*m_imagemap);
   m_graphicsScene = new QGraphicsScene;
-  m_pixmapgraphicsitem = m_graphicsScene->addPixmap(*m_imagemap);
+  //m_pixmapgraphicsitem = m_graphicsScene->addPixmap(*m_imagemap);
   m_graphicsView = new QGraphicsView(m_graphicsScene);
 
 
@@ -26,7 +30,7 @@ MyApp::MyApp(QWidget* parent) :
 MyApp::~MyApp() {
  //delete m_runButton; if added to layout, layout owns it and will delete, so not needed here
  // and don't need to delete layout since it's managed?
- delete m_imagemap;
+ //delete m_imagemap;
  delete m_image;
  delete m_graphicsScene;
  //delete m_graphicsView;
@@ -35,8 +39,9 @@ MyApp::~MyApp() {
 
 void MyApp::onButtonClicked() {
   printf("hahahahahaha\n"); 
-  m_imagemap->convertFromImage(*m_image);
-  m_pixmapgraphicsitem->setPixmap(*m_imagemap);
+  //m_imagemap->convertFromImage(*m_image);
+  //m_pixmapgraphicsitem->setPixmap(*m_imagemap);
+  m_graphicsScene->addPixmap(QPixmap::fromImage(*m_image));
   m_graphicsView->fitInView(m_graphicsScene->sceneRect(), Qt::KeepAspectRatio);
   //m_imageLabel->setPixmap(*m_imagemap);
 

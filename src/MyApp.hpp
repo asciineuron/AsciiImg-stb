@@ -23,6 +23,7 @@ private:
   QGraphicsScene* m_graphicsScene;
   QGraphicsView* m_graphicsView;
   QImage* m_image;
+  //QImage* m_imageEdited;
   //QPixmap* m_imagemap;
   QGraphicsPixmapItem* m_pixmapgraphicsitem;
 

@@ -44,11 +44,16 @@ void strided_copy(unsigned char *output, int swath_width, int swath_height,
 
 static char font_buffer[1 << 25];
 
-void dofunc(unsigned char* image_data) {
-  int text_pixel_height = 10; // 50;
+unsigned char* dofunc(unsigned char* input_image, int* out_width, int* out_height) {
+  int text_pixel_height = 20; // 50;
   //text_pixel_height =std::stoi(input); TODO get input here
 
-  FILE *font_file = fopen("../DejaVuSansMono.ttf", "r");
+  FILE *font_file = fopen("/Volumes/Ext/Code/AsciiImg-stb/DejaVuSansMono.ttf", "r");
+  if (!font_file) {
+    printf("cant open font\n");
+    return nullptr;
+  }
+  printf("read file\n");
   fread(font_buffer, sizeof(char), 1 << 25, font_file);
 
   stbtt_fontinfo font;
@@ -58,7 +63,8 @@ void dofunc(unsigned char* image_data) {
 
   // num AZaz09 = 62?
   int tot_chars = 62;
-  int char_width, char_height = 0;
+  int char_width = 0;
+  int char_height = 0;
   int char_widths[62];
   int char_heights[62];
   // unsigned char *all_chars[size_t(('z' - 'a' + 1) + ('Z' - 'A' + 1) + ('9'
@@ -73,23 +79,9 @@ void dofunc(unsigned char* image_data) {
   scale = stbtt_ScaleForMappingEmToPixels(&font, text_pixel_height);
 
   for (int i = 0; i < tot_chars; i++) {
-    // TODO note just to prefill sizes, take smallest or largest and do again
-    // with stbtt_MakeCodepointBitmap
-    // for (int i = 0; i < 1; i++) {
-    // all_chars[i] = stbtt_GetCodepointBitmap(&font, 0,
-    // stbtt_ScaleForMappingEmToPixels(&font, text_pixel_height),
-    //     (int)current_char, &char_width, &char_height, 0, 0);
     all_chars_in[i] =
       stbtt_GetCodepointBitmap(&font, scale, scale, current_char,
           &char_widths[i], &char_heights[i], 0, 0);
-
-    // printf("width: %d, height %d\n", char_width, char_height);
-    //  ^ yup I confirmed the size of each is the same, however not same as
-    //  text_pixel_height above
-    //  TODO nope they may vary!!!
-    char bmpname[100];
-    snprintf(bmpname, 100, "./testout-%d.bmp", i);
-    // stbi_write_bmp(bmpname, char_width, char_height, 1, all_chars[i]);
 
     if (current_char == 'z') {
       current_char = 'A';
@@ -100,9 +92,7 @@ void dofunc(unsigned char* image_data) {
     }
   }
 
-  
   for (int f = 0; f < tot_chars; f++) {
-    // printf("width: %d, height %d\n", char_widths[f], char_heights[f]);
     if (char_widths[f] > char_width) {
       char_width = char_widths[f];
     }
@@ -113,23 +103,12 @@ void dofunc(unsigned char* image_data) {
 
   current_char = 'a';
   for (int i = 0; i < tot_chars; i++) {
-    // for (int i = 0; i < 1; i++) {
-    // all_chars[i] = stbtt_GetCodepointBitmap(&font, 0,
-    // stbtt_ScaleForMappingEmToPixels(&font, text_pixel_height),
-    //     (int)current_char, &char_width, &char_height, 0, 0);
     all_chars_res[i] =
       (unsigned char *)malloc(char_width * char_height * sizeof(char));
+
     stbtt_MakeCodepointBitmap(&font, all_chars_res[i], char_width,
         char_height, char_width, scale, scale,
         current_char);
-
-    // printf("width: %d, height %d\n", char_width, char_height);
-    //  ^ yup I confirmed the size of each is the same, however not same as
-    //  text_pixel_height above
-    //  TODO nope they may vary!!!
-    char bmpname[100];
-    snprintf(bmpname, 100, "./rescaled-testout-%d.bmp", i);
-    stbi_write_bmp(bmpname, char_width, char_height, 1, all_chars_res[i]);
 
     if (current_char == 'z') {
       current_char = 'A';
@@ -141,9 +120,8 @@ void dofunc(unsigned char* image_data) {
   }
 
   int ii_x, ii_y, ii_n;
-  unsigned char *input_image =
-    stbi_load("../scuba.jpg", &ii_x, &ii_y, &ii_n, 1);
-  // stbi_write_jpg("./testoutscuba.jpg", ii_x, ii_y, 1, input_image, 80);
+  //unsigned char *input_image =
+  //  stbi_load("../scuba.jpg", &ii_x, &ii_y, &ii_n, 1);
 
   // step in size of text chunk over image and find best match
   // this isnt quite right:
@@ -168,7 +146,6 @@ void dofunc(unsigned char* image_data) {
         long overlap =
           strided_overlap(input_image, char_width, char_height, ii_x,
               offset_start, all_chars_res[char_idx]);
-        // printf("i %d j %d overlap: %ld\n", i, j, overlap);
         if (overlap > best_overlap) {
           best_char_idx = char_idx;
           best_overlap = overlap;
@@ -179,9 +156,13 @@ void dofunc(unsigned char* image_data) {
 
       // now write best character to output image
       int out_offset_start = i * char_height * output_x + j * char_width;
+      //strided_copy(input_image, char_width, char_height, ii_x,
       strided_copy(output_image, char_width, char_height, ii_x,
           out_offset_start, all_chars_res[best_char_idx]);
     }
   }
+  *out_width = output_x;
+  *out_height = output_y;
+  return output_image;
 }
 }

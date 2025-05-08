@@ -2,7 +2,7 @@
 #define MYLIB_H
 
 namespace MyLib {
-void dofunc(unsigned char* image_data);
+unsigned char* dofunc(unsigned char* input_image, int* out_width, int* out_height);
 }
 
 #endif

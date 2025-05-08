@@ -23,6 +23,10 @@ MyApp::MyApp(QWidget* parent) :
   mainLayout->addWidget(m_runButton, 1, 0);
   setLayout(mainLayout);
   setWindowTitle(tr("myapp"));
+ 
+  // get image displayed
+  m_graphicsScene->addPixmap(QPixmap::fromImage(*m_image));
+  m_graphicsView->fitInView(m_graphicsScene->sceneRect(), Qt::KeepAspectRatio);
 
   // connect the signals and slots of the objects under my responsibility - makes sense!
   connect(m_runButton, SIGNAL(clicked()), this, SLOT(onButtonClicked()));
@@ -43,8 +47,13 @@ void MyApp::onButtonClicked() {
   //m_imagemap->convertFromImage(*m_image);
   //m_pixmapgraphicsitem->setPixmap(*m_imagemap);
   unsigned char* im_data = m_image->bits();
-  MyLib::dofunc(im_data);
-  m_graphicsScene->addPixmap(QPixmap::fromImage(*m_image));
+  int w = 0;
+  int h = 0;
+  unsigned char* outimage = MyLib::dofunc(im_data, &w, &h);
+  //m_imageEdited = QImage();
+  QImage image_edited(outimage, w, h, QImage::Format_Grayscale8); 
+
+  m_graphicsScene->addPixmap(QPixmap::fromImage(image_edited));
   m_graphicsView->fitInView(m_graphicsScene->sceneRect(), Qt::KeepAspectRatio);
   //m_imageLabel->setPixmap(*m_imagemap);
 

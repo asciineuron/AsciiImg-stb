@@ -12,7 +12,7 @@
 #include <vector>
 
 namespace MyLib {
-long int strided_overlap(unsigned char *image, int swath_width,
+long int strided_overlap(const unsigned char *image, int swath_width,
                          int swath_height, int stride, int offset_start,
                          unsigned char *letter) {
   // assume n_channels = 1 so both monochromatic, each byte 0-255 greyscale
@@ -42,9 +42,10 @@ void strided_copy(unsigned char *output, int swath_width, int swath_height,
   }
 }
 
-static char font_buffer[1 << 25];
+//static char font_buffer[1 << 25];
 
-unsigned char* dofunc(unsigned char* input_image, int* out_width, int* out_height) {
+unsigned char* dofunc(const unsigned char* input_image, int* out_width, int* out_height, int ii_x, int ii_y) {
+  char *font_buffer = new char[1<<25];
   int text_pixel_height = 20; // 50;
   //text_pixel_height =std::stoi(input); TODO get input here
 
@@ -55,6 +56,7 @@ unsigned char* dofunc(unsigned char* input_image, int* out_width, int* out_heigh
   }
   printf("read file\n");
   fread(font_buffer, sizeof(char), 1 << 25, font_file);
+  fclose(font_file);
 
   stbtt_fontinfo font;
   stbtt_InitFont(
@@ -119,7 +121,7 @@ unsigned char* dofunc(unsigned char* input_image, int* out_width, int* out_heigh
     }
   }
 
-  int ii_x, ii_y, ii_n;
+  //int ii_x, ii_y, ii_n;
   //unsigned char *input_image =
   //  stbi_load("../scuba.jpg", &ii_x, &ii_y, &ii_n, 1);
 
@@ -157,12 +159,19 @@ unsigned char* dofunc(unsigned char* input_image, int* out_width, int* out_heigh
       // now write best character to output image
       int out_offset_start = i * char_height * output_x + j * char_width;
       //strided_copy(input_image, char_width, char_height, ii_x,
+          //out_offset_start, all_chars_res[best_char_idx]);
       strided_copy(output_image, char_width, char_height, ii_x,
           out_offset_start, all_chars_res[best_char_idx]);
     }
   }
+  delete[] font_buffer;
   *out_width = output_x;
   *out_height = output_y;
   return output_image;
+}
+
+
+unsigned char* loadimage(std::string_view filename) {
+  return nullptr;
 }
 }

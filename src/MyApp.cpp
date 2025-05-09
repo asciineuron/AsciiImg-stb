@@ -1,6 +1,7 @@
 #include "MyApp.hpp"
 #include <QtWidgets>
 #include "mylib.hpp"
+#include "stb_image.h"
 
 // TODO note actually ok to translate QImage > QPixmap
 // imagine: everything is in QImage. Only translate to display
@@ -9,7 +10,7 @@
 MyApp::MyApp(QWidget* parent) :
   QWidget(parent) {
   m_runButton = new QPushButton(tr("run"));
-  m_image = new QImage("/Volumes/Ext/Code/AsciiImg-stb/scuba.jpg");
+  //m_image = new QImage("/Volumes/Ext/Code/AsciiImg-stb/scuba.jpg");
   //m_imagemap = new QPixmap;
   //m_imageLabel = new QLabel(tr("hi"));
   //m_imageLabel->setPixmap(*m_imagemap);
@@ -25,11 +26,14 @@ MyApp::MyApp(QWidget* parent) :
   setWindowTitle(tr("myapp"));
  
   // get image displayed
-  m_graphicsScene->addPixmap(QPixmap::fromImage(*m_image));
-  m_graphicsView->fitInView(m_graphicsScene->sceneRect(), Qt::KeepAspectRatio);
+  //m_graphicsScene->addPixmap(QPixmap::fromImage(*m_image));
+  //m_graphicsView->fitInView(m_graphicsScene->sceneRect(), Qt::KeepAspectRatio);
 
   // connect the signals and slots of the objects under my responsibility - makes sense!
   connect(m_runButton, SIGNAL(clicked()), this, SLOT(onButtonClicked()));
+
+  int ii_n;
+  m_imData = stbi_load("/Volumes/Ext/Code/AsciiImg-stb/scuba.jpg", &m_imX, &m_imY, &ii_n, 1);
 }
 
 MyApp::~MyApp() {
@@ -46,12 +50,12 @@ void MyApp::onButtonClicked() {
   printf("hahahahahaha\n"); 
   //m_imagemap->convertFromImage(*m_image);
   //m_pixmapgraphicsitem->setPixmap(*m_imagemap);
-  unsigned char* im_data = m_image->bits();
+  //unsigned char* im_data = m_image->bits();
   int w = 0;
   int h = 0;
-  unsigned char* outimage = MyLib::dofunc(im_data, &w, &h);
+  unsigned char* outimage = MyLib::dofunc(m_imData, &w, &h, m_imX, m_imY);
   //m_imageEdited = QImage();
-  QImage image_edited(outimage, w, h, QImage::Format_Grayscale8); 
+  QImage image_edited(outimage, w, h, QImage::Format_Mono); 
 
   m_graphicsScene->addPixmap(QPixmap::fromImage(image_edited));
   m_graphicsView->fitInView(m_graphicsScene->sceneRect(), Qt::KeepAspectRatio);

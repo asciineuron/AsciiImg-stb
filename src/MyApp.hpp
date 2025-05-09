@@ -26,6 +26,9 @@ private:
   //QImage* m_imageEdited;
   //QPixmap* m_imagemap;
   QGraphicsPixmapItem* m_pixmapgraphicsitem;
+  unsigned char* m_imData;
+  int m_imX;
+  int m_imY;
 
 private slots:
   void onButtonClicked();

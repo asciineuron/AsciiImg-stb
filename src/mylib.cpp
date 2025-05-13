@@ -2,6 +2,8 @@
 #define STB_TRUETYPE_IMPLEMENTATION
 #define STB_IMAGE_WRITE_IMPLEMENTATION
 #define STB_IMAGE_IMPLEMENTATION
+#define STB_IMAGE_RESIZE_IMPLEMENTATION
+#include "stb_image_resize2.h"
 #include "stb_image.h"
 #include "stb_image_write.h"
 #include "stb_truetype.h"
@@ -10,7 +12,9 @@
 #include <iostream>
 #include <string>
 #include <vector>
-
+// TODO in wrapper class, keep full res image, but only send the lowres one to QT, based on resolution of displayport
+// if only some way to work in sizeless points, could rescale to output res automatically, but not rn with pixel based size
+// ! Maybe just provide a low res view? Or... just don't pass in hires images lol
 namespace MyLib {
 long int strided_overlap(const unsigned char *image, int swath_width,
                          int swath_height, int stride, int offset_start,

@@ -4,6 +4,7 @@
 #include <QWidget>
 
 class QPushButton;
+class QSlider;
 class QLabel;
 class QImage;
 class QPixmap;
@@ -17,8 +18,10 @@ class MyApp : public QWidget {
 public:
   explicit MyApp(QWidget* parent = nullptr);
   ~MyApp();
+
 private:
   QPushButton* m_runButton;
+  QSlider* m_fontSizeSlider;
   //QLabel* m_imageLabel;
   QGraphicsScene* m_graphicsScene;
   QGraphicsView* m_graphicsView;
@@ -29,9 +32,11 @@ private:
   unsigned char* m_imData;
   int m_imX;
   int m_imY;
+  int m_sliderValue = 0;
 
 private slots:
   void onButtonClicked();
+  void onSliderValueChanged();
 };
 
 #endif

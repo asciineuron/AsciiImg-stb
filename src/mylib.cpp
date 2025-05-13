@@ -12,10 +12,91 @@
 #include <iostream>
 #include <string>
 #include <vector>
+
 // TODO in wrapper class, keep full res image, but only send the lowres one to QT, based on resolution of displayport
 // if only some way to work in sizeless points, could rescale to output res automatically, but not rn with pixel based size
 // ! Maybe just provide a low res view? Or... just don't pass in hires images lol
 namespace MyLib {
+
+AsciiImg::AsciiImg(std::string& filename) {
+  m_fontBuffer = new char[1<<25];
+
+  FILE *font_file = std::fopen(filename.c_str(), "r");
+  if (!font_file) {
+    printf("can't open file\n");
+    return;
+  }
+  fread(m_fontBuffer, sizeof(char), 1<<25, font_file);
+  fclose(font_file);
+
+  stbtt_InitFont(
+      &m_fontInfo, (unsigned char *)m_fontBuffer,
+      stbtt_GetFontOffsetForIndex((unsigned char *)m_fontBuffer, 0));
+
+
+  // num AZaz09 = 62?
+  int tot_chars = 62;
+  int char_width = 0;
+  int char_height = 0;
+  int char_widths[62];
+  int char_heights[62];
+  unsigned char *all_chars_in[size_t(('z' - 'a' + 1) + ('Z' - 'A' + 1) +
+      ('9' - '0' + 1))];
+//  m_charsResized = new unsigned *char[size_t(('z' - 'a' + 1) + ('Z' - 'A' + 1) +
+//('9' - '0' + 1))];
+  m_charsResized.push_back(malloc(sizeof(char)*size_t(('z' - 'a' + 1) + ('Z' - 'A' + 1) +
+      ('9' - '0' + 1))));
+      
+ 
+  char current_char = 'a';
+
+  float scale = stbtt_ScaleForPixelHeight(&m_fontInfo, m_pixSize);
+  scale = stbtt_ScaleForMappingEmToPixels(&m_fontInfo, m_pixSize);
+
+  for (int i = 0; i < tot_chars; i++) {
+    all_chars_in[i] =
+      stbtt_GetCodepointBitmap(&m_fontInfo, scale, scale, current_char,
+          &char_widths[i], &char_heights[i], 0, 0);
+
+    if (current_char == 'z') {
+      current_char = 'A';
+    } else if (current_char == 'Z') {
+      current_char = '0';
+    } else {
+      current_char += 1;
+    }
+  }
+
+  for (int f = 0; f < tot_chars; f++) {
+    if (char_widths[f] > char_width) {
+      char_width = char_widths[f];
+    }
+    if (char_heights[f] > char_height) {
+      char_height = char_heights[f];
+    }
+  }
+
+  current_char = 'a';
+  for (int i = 0; i < tot_chars; i++) {
+    m_charsResized[i] =
+      (unsigned char *)malloc(char_width * char_height * sizeof(char));
+
+    stbtt_MakeCodepointBitmap(&m_fontInfo, m_charsResized[i], char_width,
+        char_height, char_width, scale, scale,
+        current_char);
+
+    if (current_char == 'z') {
+      current_char = 'A';
+    } else if (current_char == 'Z') {
+      current_char = '0';
+    } else {
+      current_char += 1;
+    }
+  }
+
+  
+}
+
 long int strided_overlap(const unsigned char *image, int swath_width,
                          int swath_height, int stride, int offset_start,
                          unsigned char *letter) {

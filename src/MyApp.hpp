@@ -1,6 +1,7 @@
 #ifndef MYAPP_H
 #define MYAPP_H
 
+#include "mylib.hpp"
 #include <QWidget>
 
 class QPushButton;
@@ -11,6 +12,7 @@ class QPixmap;
 class QGraphicsScene;
 class QGraphicsView;
 class QGraphicsPixmapItem;
+class QLineEdit;
 
 class MyApp : public QWidget {
   Q_OBJECT
@@ -21,21 +23,18 @@ public:
 
 private:
   QPushButton* m_runButton;
+  QPushButton* m_loadButton;
   QSlider* m_fontSizeSlider;
-  //QLabel* m_imageLabel;
+  QLineEdit* m_lineEdit;
   QGraphicsScene* m_graphicsScene;
   QGraphicsView* m_graphicsView;
-  QImage* m_image;
-  //QImage* m_imageEdited;
-  //QPixmap* m_imagemap;
-  QGraphicsPixmapItem* m_pixmapgraphicsitem;
-  unsigned char* m_imData;
-  int m_imX;
-  int m_imY;
-  int m_sliderValue = 0;
+  int m_sliderValue = 10;
+
+  std::unique_ptr<MyLib::AsciiImg> m_asciiImg;
 
 private slots:
   void onButtonClicked();
+  void onLoadButtonClicked();
   void onSliderValueChanged();
 };
 

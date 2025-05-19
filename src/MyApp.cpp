@@ -8,7 +8,7 @@ MyApp::MyApp(QWidget *parent) : QWidget(parent) {
   m_runButton = new QPushButton(tr("run"));
   m_loadButton = new QPushButton(tr("load image"));
   m_fontSizeSlider = new QSlider(Qt::Orientation::Horizontal);
-  m_lineEdit = new QLineEdit(tr("enter path to image"));
+  m_lineEdit = new QLineEdit(tr("/Volumes/Ext/Code/AsciiImg-stb/scuba1.jpg"));
   m_graphicsScene = new QGraphicsScene;
   m_graphicsView = new QGraphicsView(m_graphicsScene);
 
@@ -19,31 +19,33 @@ MyApp::MyApp(QWidget *parent) : QWidget(parent) {
   mainLayout->addWidget(m_fontSizeSlider, 2, 0);
   mainLayout->addWidget(m_runButton, 2, 1);
   setLayout(mainLayout);
-  setWindowTitle(tr("myapp"));
+  setWindowTitle(tr("Ascii-Img"));
 
   connect(m_runButton, &QAbstractButton::clicked, this,
           &MyApp::onButtonClicked);
   connect(m_fontSizeSlider, &QSlider::sliderReleased, this,
-          &MyApp::onSliderValueChanged);
+          &MyApp::onSliderValueReleased);
   connect(m_loadButton, &QAbstractButton::clicked, this,
           &MyApp::onLoadButtonClicked);
 
   m_asciiImg = std::make_unique<MyLib::AsciiImg>(
       10, "/Volumes/Ext/Code/AsciiImg-stb/DejaVuSansMono.ttf",
       "/Volumes/Ext/Code/AsciiImg-stb/scuba1.jpg");
+
+  m_graphicsScene->addPixmap(QPixmap::fromImage(m_asciiImg->getOrigImage()));
+  m_graphicsView->fitInView(m_graphicsScene->sceneRect(), Qt::KeepAspectRatio);
 }
 
 MyApp::~MyApp() {
   // all widgets managed by gridlayout and deleted there
 }
 
-void MyApp::onSliderValueChanged() {
+void MyApp::onSliderValueReleased() {
   int currentSliderVal = m_fontSizeSlider->value();
   if (currentSliderVal == m_sliderValue) {
     return; // if slider unchanged do nothing
   }
   m_sliderValue = currentSliderVal;
-  printf("slideee %d\n", m_sliderValue);
 }
 
 void MyApp::onButtonClicked() {
@@ -60,4 +62,7 @@ void MyApp::onLoadButtonClicked() {
   if (!res) {
     m_lineEdit->setText(tr("Please enter a valid image path."));
   }
+  // show input image pre-asciified
+  m_graphicsScene->addPixmap(QPixmap::fromImage(m_asciiImg->getOrigImage()));
+  m_graphicsView->fitInView(m_graphicsScene->sceneRect(), Qt::KeepAspectRatio);
 }

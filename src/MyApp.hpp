@@ -35,7 +35,7 @@ private:
 private slots:
   void onButtonClicked();
   void onLoadButtonClicked();
-  void onSliderValueChanged();
+  void onSliderValueReleased();
 };
 
 #endif

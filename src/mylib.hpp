@@ -13,12 +13,13 @@ public:
   AsciiImg(int pixsz, const std::string &font_name,
            const std::string &image_name);
 
-  //void setPixSize(int size);
+  // void setPixSize(int size);
   void setTextRows(int num);
   void getImageData();
   bool loadImage(const std::string &image_name);
 
   QImage asciifyImage();
+  const QImage& getOrigImage();
 
 private:
   static constexpr int m_totChars = 60;
@@ -26,10 +27,12 @@ private:
   std::array<char, 1 << 25> m_fontBuffer{};
   stbtt_fontinfo m_fontInfo;
   std::vector<std::vector<unsigned char>> m_charsResized{};
+  unsigned char *all_chars_in[m_totChars];
   int m_maxCharWidth = 0;
   int m_maxCharHeight = 0;
-  //int m_pixSize = 0;
-  int m_textRows = 10; // instead of pixsize, divide image into X rows. slider goes up to 1 down to something small
+  // int m_pixSize = 0;
+  int m_textRows = 10; // instead of pixsize, divide image into X rows. slider
+                       // goes up to 1 down to something small
   int m_requestedSize = 0;
   int char_widths[m_totChars];
   int char_heights[m_totChars];

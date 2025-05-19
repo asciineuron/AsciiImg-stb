@@ -94,6 +94,10 @@ void AsciiImg::rescaleFont() {
   }
 }
 
+const QImage& AsciiImg::getOrigImage() {
+  return m_imData; 
+}
+
 QImage AsciiImg::asciifyImage() {
   if (m_requestedSize != m_textRows) {
     m_textRows = m_requestedSize;
@@ -105,10 +109,12 @@ QImage AsciiImg::asciifyImage() {
   int ascii_per_row = im_x / m_maxCharWidth;
   int ascii_per_col = im_y / m_maxCharHeight;
 
-  int outszx = ascii_per_row * m_maxCharWidth;
-  int outszy = ascii_per_col * m_maxCharHeight;
+  //int outszx = ascii_per_row * m_maxCharWidth;
+  //int outszy = ascii_per_col * m_maxCharHeight;
 
-  QImage outImage(QSize(outszx, outszy), QImage::Format_Grayscale8);
+  QImage outImage(QSize(im_x, im_y), QImage::Format_Grayscale8);
+  unsigned char *outimbits = outImage.bits();
+  const unsigned char *inimbits = m_imData.bits();
 
   for (int i = 0; i < ascii_per_col; i++) {
     for (int j = 0; j < ascii_per_row; j++) {
@@ -117,7 +123,7 @@ QImage AsciiImg::asciifyImage() {
       int offset_start = i * m_maxCharHeight * im_x + j * m_maxCharWidth;
 
       for (int char_idx = 0; char_idx < m_totChars; char_idx++) {
-        long overlap = strided_overlap(m_imData.bits(), m_maxCharWidth,
+        long overlap = strided_overlap(inimbits, m_maxCharWidth,
                                        m_maxCharHeight, im_x, offset_start,
                                        m_charsResized[char_idx].data());
         if (overlap > best_overlap) {
@@ -126,11 +132,11 @@ QImage AsciiImg::asciifyImage() {
         }
       }
       // now write best character to output image
-      int out_offset_start = i * m_maxCharHeight * outszx + j * m_maxCharWidth;
-      //strided_copy(outImage.bits(), m_maxCharWidth, m_maxCharHeight, im_x,
-      //             out_offset_start, m_charsResized[best_char_idx].data());
-      strided_copy(outImage.bits(), char_widths[best_char_idx], char_heights[best_char_idx], im_x,
+      int out_offset_start = i * m_maxCharHeight * im_x + j * m_maxCharWidth;
+      strided_copy(outimbits, m_maxCharWidth, m_maxCharHeight, im_x,
                    out_offset_start, m_charsResized[best_char_idx].data());
+      //strided_copy(outImage.bits(), char_widths[best_char_idx], char_heights[best_char_idx], im_x,
+      //             out_offset_start, m_charsResized[best_char_idx].data());
     }
   }
   return outImage;

@@ -98,7 +98,7 @@ const QImage& AsciiImg::getOrigImage() {
   return m_imData; 
 }
 
-QImage AsciiImg::asciifyImage() {
+void AsciiImg::asciifyImage() {
   if (m_requestedSize != m_textRows) {
     m_textRows = m_requestedSize;
     rescaleFont();
@@ -114,6 +114,7 @@ QImage AsciiImg::asciifyImage() {
 
   QImage outImage(QSize(im_x, im_y), QImage::Format_Grayscale8);
   unsigned char *outimbits = outImage.bits();
+  memset(outimbits, 0, im_x*im_y*sizeof(char));
   const unsigned char *inimbits = m_imData.bits();
 
   for (int i = 0; i < ascii_per_col; i++) {
@@ -139,7 +140,14 @@ QImage AsciiImg::asciifyImage() {
       //             out_offset_start, m_charsResized[best_char_idx].data());
     }
   }
-  return outImage;
+  m_asciifiedImData = std::move(outImage);
+}
+
+const QImage& AsciiImg::getAsciifyImage() {
+  if (!m_hasAsciified) {
+    asciifyImage();
+  }
+  return m_asciifiedImData;
 }
 
 bool AsciiImg::loadImage(const std::string &image_name) {
@@ -149,6 +157,7 @@ bool AsciiImg::loadImage(const std::string &image_name) {
   }
   tryImage.convertTo(QImage::Format_Grayscale8);
   m_imData = tryImage;
+  m_hasAsciified = false;
   return true;
 }
 

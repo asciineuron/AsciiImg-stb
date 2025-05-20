@@ -3,10 +3,14 @@
 #include "stb_image.h"
 #include <Qt>
 #include <QtWidgets>
+#include <QFileDialog>
 
 MyApp::MyApp(QWidget *parent) : QWidget(parent) {
   m_runButton = new QPushButton(tr("run"));
   m_loadButton = new QPushButton(tr("load image"));
+  m_saveButton = new QPushButton(tr("save image"));
+  m_saveButton->setEnabled(false);
+
   m_fontSizeSlider = new QSlider(Qt::Orientation::Horizontal);
   m_lineEdit = new QLineEdit(tr("/Volumes/Ext/Code/AsciiImg-stb/scuba1.jpg"));
   m_graphicsScene = new QGraphicsScene;
@@ -14,6 +18,7 @@ MyApp::MyApp(QWidget *parent) : QWidget(parent) {
 
   QGridLayout *mainLayout = new QGridLayout;
   mainLayout->addWidget(m_graphicsView, 0, 0);
+  mainLayout->addWidget(m_saveButton, 0, 1);
   mainLayout->addWidget(m_lineEdit, 1, 0);
   mainLayout->addWidget(m_loadButton, 1, 1);
   mainLayout->addWidget(m_fontSizeSlider, 2, 0);
@@ -27,6 +32,8 @@ MyApp::MyApp(QWidget *parent) : QWidget(parent) {
           &MyApp::onSliderValueReleased);
   connect(m_loadButton, &QAbstractButton::clicked, this,
           &MyApp::onLoadButtonClicked);
+  connect(m_saveButton, &QAbstractButton::clicked, this,
+          &MyApp::onSaveButtonClicked);
 
   m_asciiImg = std::make_unique<MyLib::AsciiImg>(
       10, "/Volumes/Ext/Code/AsciiImg-stb/DejaVuSansMono.ttf",
@@ -50,11 +57,14 @@ void MyApp::onSliderValueReleased() {
 
 void MyApp::onButtonClicked() {
   m_asciiImg->setTextRows(m_sliderValue + 1);
-  QImage asciifiedImage = m_asciiImg->asciifyImage();
+  m_asciiImg->asciifyImage();
+  const QImage& asciifiedImage = m_asciiImg->getAsciifyImage();
   
   m_graphicsScene->clear();
   m_graphicsScene->addPixmap(QPixmap::fromImage(asciifiedImage));
   m_graphicsView->fitInView(m_graphicsScene->sceneRect(), Qt::KeepAspectRatio);
+
+  m_saveButton->setEnabled(true);
 }
 
 void MyApp::onLoadButtonClicked() {
@@ -65,4 +75,13 @@ void MyApp::onLoadButtonClicked() {
   // show input image pre-asciified
   m_graphicsScene->addPixmap(QPixmap::fromImage(m_asciiImg->getOrigImage()));
   m_graphicsView->fitInView(m_graphicsScene->sceneRect(), Qt::KeepAspectRatio);
+
+  m_saveButton->setEnabled(false);
+}
+
+void MyApp::onSaveButtonClicked() {
+  QString fileSaveName = QFileDialog::getSaveFileName(this, tr("Save File"), "untitled.png");
+  const QImage& asciifiedImage = m_asciiImg->getAsciifyImage(); 
+  asciifiedImage.save(fileSaveName);
+  printf(fileSaveName.toStdString().c_str());
 }

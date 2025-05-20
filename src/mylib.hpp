@@ -18,12 +18,14 @@ public:
   void getImageData();
   bool loadImage(const std::string &image_name);
 
-  QImage asciifyImage();
+  void asciifyImage();
+  const QImage& getAsciifyImage();
   const QImage& getOrigImage();
 
 private:
   static constexpr int m_totChars = 60;
   QImage m_imData;
+  QImage m_asciifiedImData;
   std::array<char, 1 << 25> m_fontBuffer{};
   stbtt_fontinfo m_fontInfo;
   std::vector<std::vector<unsigned char>> m_charsResized{};
@@ -36,6 +38,7 @@ private:
   int m_requestedSize = 0;
   int char_widths[m_totChars];
   int char_heights[m_totChars];
+  bool m_hasAsciified = false;
 
   void loadFont(const std::string &filename);
   void rescaleFont();

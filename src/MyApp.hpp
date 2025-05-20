@@ -24,6 +24,7 @@ public:
 private:
   QPushButton* m_runButton;
   QPushButton* m_loadButton;
+  QPushButton* m_saveButton;
   QSlider* m_fontSizeSlider;
   QLineEdit* m_lineEdit;
   QGraphicsScene* m_graphicsScene;
@@ -35,6 +36,7 @@ private:
 private slots:
   void onButtonClicked();
   void onLoadButtonClicked();
+  void onSaveButtonClicked();
   void onSliderValueReleased();
 };
 

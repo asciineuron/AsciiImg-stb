@@ -5,6 +5,20 @@
 #include <QtWidgets>
 #include <QFileDialog>
 
+MyDragView::MyDragView(QWidget *parent) : QGraphicsView(parent) {
+  setAcceptDrops(true);
+}
+
+MyDragView::MyDragView(QGraphicsScene *scene, QWidget *parent)
+    : QGraphicsView(scene, parent) {
+  setAcceptDrops(true);
+}
+
+void MyDragView::dropEvent(QDropEvent *event) {
+  const QMimeData *mimeData = event->mimeData();
+  emit changed(mimeData);
+}
+
 MyApp::MyApp(QWidget *parent) : QWidget(parent) {
   m_runButton = new QPushButton(tr("run"));
   m_loadButton = new QPushButton(tr("load image"));
@@ -14,7 +28,8 @@ MyApp::MyApp(QWidget *parent) : QWidget(parent) {
   m_fontSizeSlider = new QSlider(Qt::Orientation::Horizontal);
   m_lineEdit = new QLineEdit(tr("/Volumes/Ext/Code/AsciiImg-stb/scuba1.jpg"));
   m_graphicsScene = new QGraphicsScene;
-  m_graphicsView = new QGraphicsView(m_graphicsScene);
+  //m_graphicsView = new QGraphicsView(m_graphicsScene);
+  m_graphicsView = new MyDragView(m_graphicsScene);
 
   QGridLayout *mainLayout = new QGridLayout;
   mainLayout->addWidget(m_graphicsView, 0, 0);
@@ -34,6 +49,8 @@ MyApp::MyApp(QWidget *parent) : QWidget(parent) {
           &MyApp::onLoadButtonClicked);
   connect(m_saveButton, &QAbstractButton::clicked, this,
           &MyApp::onSaveButtonClicked);
+  connect(m_graphicsView, &MyDragView::changed, this,
+          &MyApp::onDropChanged);
 
   m_asciiImg = std::make_unique<MyLib::AsciiImg>(
       10, "/Volumes/Ext/Code/AsciiImg-stb/DejaVuSansMono.ttf",
@@ -45,6 +62,10 @@ MyApp::MyApp(QWidget *parent) : QWidget(parent) {
 
 MyApp::~MyApp() {
   // all widgets managed by gridlayout and deleted there
+}
+
+void MyApp::onDropChanged() {
+  printf("got it!\n");
 }
 
 void MyApp::onSliderValueReleased() {

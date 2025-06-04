@@ -1,25 +1,13 @@
 #include "MyApp.hpp"
 #include "mylib.hpp"
 #include "stb_image.h"
+#include <iostream>
 #include <Qt>
 #include <QtWidgets>
 #include <QFileDialog>
 
-MyDragView::MyDragView(QWidget *parent) : QGraphicsView(parent) {
-  setAcceptDrops(true);
-}
-
-MyDragView::MyDragView(QGraphicsScene *scene, QWidget *parent)
-    : QGraphicsView(scene, parent) {
-  setAcceptDrops(true);
-}
-
-void MyDragView::dropEvent(QDropEvent *event) {
-  const QMimeData *mimeData = event->mimeData();
-  emit changed(mimeData);
-}
-
 MyApp::MyApp(QWidget *parent) : QWidget(parent) {
+  setAcceptDrops(true);
   m_runButton = new QPushButton(tr("run"));
   m_loadButton = new QPushButton(tr("load image"));
   m_saveButton = new QPushButton(tr("save image"));
@@ -28,8 +16,9 @@ MyApp::MyApp(QWidget *parent) : QWidget(parent) {
   m_fontSizeSlider = new QSlider(Qt::Orientation::Horizontal);
   m_lineEdit = new QLineEdit(tr("/Volumes/Ext/Code/AsciiImg-stb/scuba1.jpg"));
   m_graphicsScene = new QGraphicsScene;
-  //m_graphicsView = new QGraphicsView(m_graphicsScene);
-  m_graphicsView = new MyDragView(m_graphicsScene);
+  m_graphicsView = new QGraphicsView(m_graphicsScene);
+  m_graphicsView->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+  m_graphicsView->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
 
   QGridLayout *mainLayout = new QGridLayout;
   mainLayout->addWidget(m_graphicsView, 0, 0);
@@ -49,8 +38,6 @@ MyApp::MyApp(QWidget *parent) : QWidget(parent) {
           &MyApp::onLoadButtonClicked);
   connect(m_saveButton, &QAbstractButton::clicked, this,
           &MyApp::onSaveButtonClicked);
-  connect(m_graphicsView, &MyDragView::changed, this,
-          &MyApp::onDropChanged);
 
   m_asciiImg = std::make_unique<MyLib::AsciiImg>(
       10, "/Volumes/Ext/Code/AsciiImg-stb/DejaVuSansMono.ttf",
@@ -64,8 +51,29 @@ MyApp::~MyApp() {
   // all widgets managed by gridlayout and deleted there
 }
 
-void MyApp::onDropChanged() {
-  printf("got it!\n");
+void MyApp::resizeEvent(QResizeEvent *event) {
+  m_graphicsView->fitInView(m_graphicsScene->sceneRect(), Qt::KeepAspectRatio);
+}
+
+void MyApp::dragEnterEvent(QDragEnterEvent *event) {
+  if (event->mimeData()->hasUrls()) {
+    event->acceptProposedAction();
+  }
+}
+
+void MyApp::dropEvent(QDropEvent *event) {
+  auto urls = event->mimeData()->urls();
+  auto u = urls.begin();
+  QString path = u->path(); 
+  std::cout << path.toStdString();
+  if (m_imagepath != path) {
+    m_imagepath = path;
+  }
+
+  m_asciiImg->loadImage(m_imagepath.toStdString());
+  m_graphicsScene->clear();
+  m_graphicsScene->addPixmap(QPixmap::fromImage(m_asciiImg->getOrigImage()));
+  m_graphicsView->fitInView(m_graphicsScene->sceneRect(), Qt::KeepAspectRatio);
 }
 
 void MyApp::onSliderValueReleased() {
@@ -94,6 +102,7 @@ void MyApp::onLoadButtonClicked() {
     m_lineEdit->setText(tr("Please enter a valid image path."));
   }
   // show input image pre-asciified
+  m_graphicsScene->clear();
   m_graphicsScene->addPixmap(QPixmap::fromImage(m_asciiImg->getOrigImage()));
   m_graphicsView->fitInView(m_graphicsScene->sceneRect(), Qt::KeepAspectRatio);
 

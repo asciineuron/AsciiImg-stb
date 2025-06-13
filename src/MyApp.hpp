@@ -30,10 +30,12 @@ private:
   QPushButton* m_loadButton;
   QPushButton* m_saveButton;
   QSlider* m_fontSizeSlider;
+  QSlider* m_padSizeSlider;
   QLineEdit* m_lineEdit;
   QGraphicsScene* m_graphicsScene;
   QGraphicsView* m_graphicsView;
   int m_sliderValue = 10;
+  int m_padSliderValue = 0;
   QString m_imagepath {};
 
   std::unique_ptr<MyLib::AsciiImg> m_asciiImg;
@@ -43,4 +45,5 @@ private slots:
   void onLoadButtonClicked();
   void onSaveButtonClicked();
   void onSliderValueReleased();
+  void onPadSliderValueReleased();
 };

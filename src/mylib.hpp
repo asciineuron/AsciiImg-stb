@@ -13,7 +13,8 @@ public:
            const std::string &image_name);
 
   // void setPixSize(int size);
-  void setTextRows(int num);
+  void setTextRows(int num) { m_requestedSize = num; };
+  void setPadFactor(float pad) { m_padFactor = pad; }; // only allow positive?
   void getImageData();
   bool loadImage(const std::string &image_name);
 
@@ -43,10 +44,10 @@ private:
   void rescaleFont();
   int im_x = 0;
   int im_y = 0;
+  float m_padFactor = 1.0f; // scale of m_maxCharWidth/Height to give more space around letters
 };
 
 unsigned char *dofunc(const unsigned char *input_image, int *out_width,
                       int *out_height, int ii_x, int ii_y);
 
 } // namespace MyLib
-

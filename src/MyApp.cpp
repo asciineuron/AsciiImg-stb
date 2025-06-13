@@ -14,6 +14,8 @@ MyApp::MyApp(QWidget *parent) : QWidget(parent) {
   m_saveButton->setEnabled(false);
 
   m_fontSizeSlider = new QSlider(Qt::Orientation::Horizontal);
+  m_fontSizeSlider->setValue(m_sliderValue);
+  m_padSizeSlider = new QSlider(Qt::Orientation::Horizontal);
   m_lineEdit = new QLineEdit(tr("/Volumes/Ext/Code/AsciiImg-stb/scuba1.jpg"));
   m_graphicsScene = new QGraphicsScene;
   m_graphicsView = new QGraphicsView(m_graphicsScene);
@@ -27,6 +29,7 @@ MyApp::MyApp(QWidget *parent) : QWidget(parent) {
   mainLayout->addWidget(m_loadButton, 1, 1);
   mainLayout->addWidget(m_fontSizeSlider, 2, 0);
   mainLayout->addWidget(m_runButton, 2, 1);
+  mainLayout->addWidget(m_padSizeSlider, 3, 0);
   setLayout(mainLayout);
   setWindowTitle(tr("Ascii-Img"));
 
@@ -34,6 +37,8 @@ MyApp::MyApp(QWidget *parent) : QWidget(parent) {
           &MyApp::onButtonClicked);
   connect(m_fontSizeSlider, &QSlider::sliderReleased, this,
           &MyApp::onSliderValueReleased);
+  connect(m_padSizeSlider, &QSlider::sliderReleased, this,
+        &MyApp::onPadSliderValueReleased);
   connect(m_loadButton, &QAbstractButton::clicked, this,
           &MyApp::onLoadButtonClicked);
   connect(m_saveButton, &QAbstractButton::clicked, this,
@@ -82,10 +87,20 @@ void MyApp::onSliderValueReleased() {
     return; // if slider unchanged do nothing
   }
   m_sliderValue = currentSliderVal;
+  m_asciiImg->setTextRows(m_sliderValue + 1);
+}
+
+void MyApp::onPadSliderValueReleased() {
+  int currentSliderVal = m_padSizeSlider->value();
+  if (currentSliderVal == m_padSliderValue) {
+    return; // if slider unchanged do nothing
+  }
+  m_padSliderValue = currentSliderVal;
+
+  m_asciiImg->setPadFactor((m_padSliderValue / 100.f) + 1.0f); // between 1 and 2x pad
 }
 
 void MyApp::onButtonClicked() {
-  m_asciiImg->setTextRows(m_sliderValue + 1);
   m_asciiImg->asciifyImage();
   const QImage& asciifiedImage = m_asciiImg->getAsciifyImage();
   

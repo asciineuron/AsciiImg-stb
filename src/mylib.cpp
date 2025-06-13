@@ -21,6 +21,12 @@ long int strided_overlap(const unsigned char *image, int swath_width,
 void strided_copy(unsigned char *output, int swath_width, int swath_height,
                   int stride, int offset_start, unsigned char *letter);
 
+long int strided_overlap(const QRgb *image, int swath_width,
+                         int swath_height, int stride, int offset_start,
+                         unsigned char *letter);
+void strided_copy(QRgb *output, int swath_width, int swath_height,
+                  int stride, int offset_start, unsigned char *letter);
+
 void AsciiImg::loadFont(const std::string &filename) {
   FILE *font_file = std::fopen(filename.c_str(), "r");
   if (!font_file) {
@@ -36,7 +42,6 @@ void AsciiImg::loadFont(const std::string &filename) {
 }
 
 // void AsciiImg::setPixSize(int size) { m_requestedSize = size; }
-void AsciiImg::setTextRows(int num) { m_requestedSize = num; }
 
 void AsciiImg::rescaleFont() {
   // rescales based on m_pixSize
@@ -73,6 +78,8 @@ void AsciiImg::rescaleFont() {
     }
   }
 
+  m_maxCharWidth = int( m_maxCharWidth * m_padFactor);
+  m_maxCharHeight = int(m_maxCharHeight * m_padFactor);
   current_char = 'a';
   for (int i = 0; i < m_totChars; i++) {
     m_charsResized[i].assign(m_maxCharWidth * m_maxCharHeight, 0);
@@ -110,9 +117,11 @@ void AsciiImg::asciifyImage() {
   //int outszx = ascii_per_row * m_maxCharWidth;
   //int outszy = ascii_per_col * m_maxCharHeight;
 
-  QImage outImage(QSize(im_x, im_y), QImage::Format_Grayscale8);
-  unsigned char *outimbits = outImage.bits();
-  memset(outimbits, 0, im_x*im_y*sizeof(char));
+  //QImage outImage(QSize(im_x, im_y), QImage::Format_Grayscale8);
+  QImage outImage(m_imData); // no difference...
+  //unsigned char *outimbits = outImage.bits();
+  QRgb* outimbits = reinterpret_cast<QRgb*>(outImage.bits());
+  memset(outimbits, 0, im_x*im_y*sizeof(QRgb));
   const unsigned char *inimbits = m_imData.bits();
 
   for (int i = 0; i < ascii_per_col; i++) {
@@ -153,7 +162,6 @@ bool AsciiImg::loadImage(const std::string &image_name) {
   if (tryImage.isNull()) {
     return false;
   }
-  tryImage.convertTo(QImage::Format_Grayscale8);
   m_imData = std::move(tryImage);
   im_x = m_imData.size().width();
   im_y = m_imData.size().height();
@@ -164,7 +172,6 @@ bool AsciiImg::loadImage(const std::string &image_name) {
 AsciiImg::AsciiImg(int pixsz, const std::string &font_name,
                    const std::string &image_name)
     : m_imData(image_name.c_str()), m_textRows(pixsz) {
-  m_imData.convertTo(QImage::Format_Grayscale8);
   im_x = m_imData.size().width();
   im_y = m_imData.size().height();
   m_charsResized.insert(m_charsResized.begin(), m_totChars,
@@ -197,6 +204,38 @@ void strided_copy(unsigned char *output, int swath_width, int swath_height,
   for (int row = 0; row < swath_height; row++) {
     for (int col = 0; col < swath_width; col++) {
       output[offset_start + row * stride + col] = letter[letter_idx];
+
+      letter_idx++;
+    }
+  }
+}
+
+// reimplemented for QRgb based image arrays
+long int strided_overlap(const QRgb *image, int swath_width,
+                         int swath_height, int stride, int offset_start,
+                         unsigned char *letter) {
+  // assume n_channels = 1 so both monochromatic, each byte 0-255 greyscale
+  long overlap = 0;
+  int letter_idx = 0;
+  for (int row = 0; row < swath_height; row++) {
+    for (int col = 0; col < swath_width; col++) {
+      char im_pix = (image[offset_start + row * stride + col]) >> 24; // only 1 of the 4 identical bytes
+      char let_pix = letter[letter_idx];
+      overlap += ((int)im_pix) * ((int)let_pix);
+
+      letter_idx++;
+    }
+  }
+  return overlap;
+}
+
+void strided_copy(QRgb *output, int swath_width, int swath_height, int stride,
+                  int offset_start, unsigned char *letter) {
+  int letter_idx = 0;
+  for (int row = 0; row < swath_height; row++) {
+    for (int col = 0; col < swath_width; col++) {
+      const char l = letter[letter_idx];
+      output[offset_start + row * stride + col] = (l << 24) | (l << 16) | (l << 8) | l; //*(reinterpret_cast<QRgb*>(letter[letter_idx]));
 
       letter_idx++;
     }

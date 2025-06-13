@@ -1,5 +1,4 @@
-#ifndef MYAPP_H
-#define MYAPP_H
+#pragma once
 
 #include "mylib.hpp"
 #include <QWidget>
@@ -45,5 +44,3 @@ private slots:
   void onSaveButtonClicked();
   void onSliderValueReleased();
 };
-
-#endif

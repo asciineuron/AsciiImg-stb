@@ -1,5 +1,4 @@
-#ifndef MYLIB_H
-#define MYLIB_H
+#pragma once
 
 #include "stb_truetype.h"
 #include <QImage>
@@ -42,6 +41,8 @@ private:
 
   void loadFont(const std::string &filename);
   void rescaleFont();
+  int im_x = 0;
+  int im_y = 0;
 };
 
 unsigned char *dofunc(const unsigned char *input_image, int *out_width,
@@ -49,4 +50,3 @@ unsigned char *dofunc(const unsigned char *input_image, int *out_width,
 
 } // namespace MyLib
 
-#endif

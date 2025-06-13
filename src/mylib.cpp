@@ -103,8 +103,6 @@ void AsciiImg::asciifyImage() {
     m_textRows = m_requestedSize;
     rescaleFont();
   }
-  int im_x = m_imData.size().width();
-  int im_y = m_imData.size().height();
 
   int ascii_per_row = im_x / m_maxCharWidth;
   int ascii_per_col = im_y / m_maxCharHeight;
@@ -156,7 +154,9 @@ bool AsciiImg::loadImage(const std::string &image_name) {
     return false;
   }
   tryImage.convertTo(QImage::Format_Grayscale8);
-  m_imData = tryImage;
+  m_imData = std::move(tryImage);
+  im_x = m_imData.size().width();
+  im_y = m_imData.size().height();
   m_hasAsciified = false;
   return true;
 }
@@ -165,6 +165,8 @@ AsciiImg::AsciiImg(int pixsz, const std::string &font_name,
                    const std::string &image_name)
     : m_imData(image_name.c_str()), m_textRows(pixsz) {
   m_imData.convertTo(QImage::Format_Grayscale8);
+  im_x = m_imData.size().width();
+  im_y = m_imData.size().height();
   m_charsResized.insert(m_charsResized.begin(), m_totChars,
                         std::vector<unsigned char>());
   loadFont(font_name); // populates m_charsResized and m_fontBuffer
